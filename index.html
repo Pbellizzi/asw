@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>asw</title>
+</head>
+<body>
+    <div>
+        <label for="desde">Desde: </label><input type="text" name="Desde" id="desde">
+        <label for="hasta">Hasta: </label><input type="text" name="Hasta" id="hasta"> 
+    </div>
+<br>
+    <button onclick="main()">Descargar cosos</button>
+</body>
+<script>
+    async function main() {  
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+          }
+
+        async function fetchAsw(number){   
+            let baseUrl = "https://www.asofterworld.com/index.php?id="
+            let parser = new DOMParser();
+            fetch(baseUrl+number.toString() ).then((response) => response.text())
+            .then((text) => {
+                let doc = parser.parseFromString(text, 'text/html');
+                let src = doc.querySelector("#comicimg").getElementsByTagName("img")[0].src
+                let name = doc.querySelector("#comicimg").getElementsByTagName("img")[0].title+".jpg"
+                fetch(src)
+                .then(response => response.blob())
+                .then((blob) => {
+                    const a = document.createElement("a");
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = number.toString()+" - "+ name;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+            })                
+        } 
+        let desde = document.querySelector("#desde").value
+        let hasta = document.querySelector("#hasta").value
+        
+        for (let step = desde; step <= hasta; step++) {
+            fetchAsw(step)
+            await sleep(1000);
+        }
+    }
+
+</script>
+</html>
